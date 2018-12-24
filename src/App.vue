@@ -46,7 +46,7 @@ export default {
     check() {
       this.loading = true;
       this.result = {};
-      axios.get('http://46.101.203.108:8000/track', {
+      axios.get('https://q8qkcad7ah.execute-api.us-east-1.amazonaws.com/track', {
         params: {
           prefix: this.prefix,
           number: this.number,
