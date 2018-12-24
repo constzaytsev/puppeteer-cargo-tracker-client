@@ -1,14 +1,18 @@
 <template>
   <div id="app">
     <div class="container">
+      <img src="1f575.png" />
       <h5>Быстрая проверка по номеру накладной</h5>
       <form class="form-inline">
-        <input type="text" style="width:60px;" v-model="prefix" />&nbsp;
-        <input type="text" class="w60" v-model="number" />&nbsp;
+        <masked-input type="text" style="width:60px;" v-model="prefix" mask="+++" placeholder="___" />&nbsp;
+        <masked-input type="text" style="width:100px;" v-model="number" mask="11111111" placeholder="________" />&nbsp;
         <button @click.prevent="check()" class="button outline">Проверить</button>
       </form>
     </div>
-    <div v-if="loading" class="loader">Loading...</div>
+    <div v-if="loading">
+        <div class="loader">Loading...</div>
+
+    </div>
     <div v-if="result.success" v-html="result.success">
     </div>
     <div v-if="result.error">
@@ -20,6 +24,7 @@
 <script>
 
 import axios from 'axios';
+import MaskedInput from 'vue-masked-input';
 
 export default {
   name: 'app',
@@ -29,8 +34,12 @@ export default {
       prefix: '',
       number: '',
       result: {},
-      loading: false
-    }
+      loading: false,
+    };
+  },
+
+  components: {
+    MaskedInput,
   },
 
   methods: {
@@ -40,20 +49,20 @@ export default {
       axios.get('http://46.101.203.108:8000/track', {
         params: {
           prefix: this.prefix,
-          number: this.number
-        }
+          number: this.number,
+        },
       })
-      .then(({ data }) => {
-          this.result = data.result
-      })
-      .catch((error) => {
-        this.result.error = 'sdfsdfsdf';
-      })
-      .then(() => {
-        this.loading = false;
-      })
-    }
-  }
+        .then(({ data }) => {
+          this.result = data.result;
+        })
+        .catch((error) => {
+          this.result.error = 'sdfsdfsdf';
+        })
+        .then(() => {
+          this.loading = false;
+        });
+    },
+  },
 };
 </script>
 
@@ -97,6 +106,7 @@ button.outline {
 }
 .loader {
   margin: 60px auto;
+  margin-bottom: 1rem;
   font-size: 10px;
   position: relative;
   text-indent: -9999em;
