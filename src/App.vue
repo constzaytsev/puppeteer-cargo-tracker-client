@@ -2,7 +2,7 @@
   <div id="app">
     <div class="container">
       <img src="1f575.png" />
-      <h5>Быстрая проверка по номеру накладной</h5>
+      <h5>Находим груз по номеру накладной</h5>
       <p>Например <code>555</code>&nbsp;<code>12508300</code></p>
       <form class="form-inline">
         <masked-input type="text" style="width:60px;" v-model="prefix" mask="+++" placeholder="___" />&nbsp;
