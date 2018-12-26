@@ -1,23 +1,41 @@
 <template>
-  <div id="app">
-    <div class="container">
-      <img src="1f575.png" />
-      <h5>Находим груз по номеру накладной</h5>
-      <p>Например <code>555</code>&nbsp;<code>12508300</code></p>
+  <div id="tracker">
       <form class="form-inline">
-        <masked-input type="text" style="width:60px;" v-model="prefix" mask="+++" placeholder="___" />&nbsp;
-        <masked-input type="text" style="width:100px;" v-model="number" mask="11111111" placeholder="________" />&nbsp;
-        <button @click.prevent="check()" class="button outline">Проверить</button>
+        <input
+          v-model="prefix"
+          v-validate="'required|alpha_num|length:3'"
+          v-tooltip.top="{
+            content: errors.first('prefix'),
+            show: errors.has('prefix'),
+            trigger: 'manual',
+            }"
+          :class="{'error': errors.has('prefix') }"
+          data-vv-as="Префикс"
+          name="prefix"
+          type="text"
+          style="width:60px;" />
+        <input
+          v-model="number"
+          v-validate="'required|numeric|length:8'"
+          v-tooltip.bottom="{
+            content: errors.first('number'),
+            show: errors.has('number'),
+            trigger: 'manual',
+            }"
+          :class="{'error': errors.has('number') }"
+          data-vv-as="Номер"
+          name="number"
+          type="text"
+          style="width:100px;" />
+        <button @click.prevent="validateBeforeSubmit()" class="button outline">Проверить</button>
       </form>
-    </div>
     <div v-if="loading">
         <div class="loader">Loading...</div>
-
     </div>
     <div v-if="result.success" v-html="result.success">
     </div>
     <div v-if="result.error">
-      {{result.error}}<br /><img src="1f937-2642.png" />
+      {{result.error}}
     </div>
   </div>
 </template>
@@ -25,7 +43,6 @@
 <script>
 
 import axios from 'axios';
-import MaskedInput from 'vue-masked-input';
 
 export default {
   name: 'app',
@@ -39,12 +56,32 @@ export default {
     };
   },
 
-  components: {
-    MaskedInput,
+  computed: {
+    enabled() {
+      return !!((this.$route.query.prefix && this.$route.query.number));
+    },
+  },
+
+  created() {
+    if (this.enabled) {
+      this.prefix = this.$route.query.prefix;
+      this.number = this.$route.query.number;
+    }
+  },
+
+  mounted() {
+    if (this.enabled) this.validateBeforeSubmit();
   },
 
   methods: {
+    validateBeforeSubmit() {
+      this.$validator.validateAll().then((result) => {
+        if (result) this.check();
+      });
+    },
+
     check() {
+      this.$router.replace({ query: { prefix: this.prefix, number: this.number } });
       this.loading = true;
       this.result = {};
       axios.get('https://q8qkcad7ah.execute-api.us-east-1.amazonaws.com/track', {
@@ -57,7 +94,7 @@ export default {
           this.result = data.result;
         })
         .catch((error) => {
-          this.result.error = 'sdfsdfsdf';
+          this.result = { result: { error } };
         })
         .then(() => {
           this.loading = false;
@@ -68,36 +105,6 @@ export default {
 </script>
 
 <style lang="scss">
-body {
-  background: #A1FFCE;  /* fallback for old browsers */
-background: -webkit-linear-gradient(to right, #FAFFD1, #A1FFCE);  /* Chrome 10-25, Safari 5.1-6 */
-background: linear-gradient(to right, #FAFFD1, #A1FFCE); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-}
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  padding: 5rem;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
-
-input[type=text] {
-  background: transparent;
-  border-color: #000;
-}
-
-button.outline {
-  color:#000 !important;
-  border-color: #000 !important;
-}
-
-.container {
-  width: 500px;
-  margin: 0 auto;
-}
 
 .loader,
 .loader:after {
@@ -139,6 +146,101 @@ button.outline {
   100% {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
+  }
+}
+
+.tooltip {
+  display: block !important;
+  z-index: 10000;
+
+  .tooltip-inner {
+    font-family: Arial;
+    font-size: 11px;
+    background: #f44148;
+    color: white;
+    border-radius: 4px;
+    padding: 5px 10px 4px;
+  }
+
+  .tooltip-arrow {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    position: absolute;
+    margin: 5px;
+    border-color: #f44148;
+  }
+
+  &[x-placement^="top"] {
+    margin-bottom: 5px;
+
+    .tooltip-arrow {
+      border-width: 5px 5px 0 5px;
+      border-left-color: transparent !important;
+      border-right-color: transparent !important;
+      border-bottom-color: transparent !important;
+      bottom: -5px;
+      left: calc(50% - 5px);
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  &[x-placement^="bottom"] {
+    margin-top: 5px;
+
+    .tooltip-arrow {
+      border-width: 0 5px 5px 5px;
+      border-left-color: transparent !important;
+      border-right-color: transparent !important;
+      border-top-color: transparent !important;
+      top: -5px;
+      left: calc(50% - 5px);
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+  }
+
+  &[x-placement^="right"] {
+    margin-left: 5px;
+
+    .tooltip-arrow {
+      border-width: 5px 5px 5px 0;
+      border-left-color: transparent !important;
+      border-top-color: transparent !important;
+      border-bottom-color: transparent !important;
+      left: -5px;
+      top: calc(50% - 5px);
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  &[x-placement^="left"] {
+    margin-right: 5px;
+
+    .tooltip-arrow {
+      border-width: 5px 0 5px 5px;
+      border-top-color: transparent !important;
+      border-right-color: transparent !important;
+      border-bottom-color: transparent !important;
+      right: -5px;
+      top: calc(50% - 5px);
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+
+  &[aria-hidden='true'] {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .15s, visibility .15s;
+  }
+
+  &[aria-hidden='false'] {
+    visibility: visible;
+    opacity: 1;
+    transition: opacity .15s;
   }
 }
 
