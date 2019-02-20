@@ -84,7 +84,7 @@ export default {
       this.$router.replace({ query: { prefix: this.prefix, number: this.number } });
       this.loading = true;
       this.result = {};
-      axios.get('https://q8qkcad7ah.execute-api.us-east-1.amazonaws.com/track', {
+      axios.get(process.env.VUE_APP_API_URL, {
         params: {
           prefix: this.prefix,
           number: this.number,
