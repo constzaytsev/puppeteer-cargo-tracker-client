@@ -4,6 +4,7 @@ import VeeValidate, { Validator } from 'vee-validate';
 import VTooltip from 'v-tooltip';
 import ru from '../node_modules/vee-validate/dist/locale/ru';
 import App from './App.vue';
+import './assets/styles.scss';
 
 Vue.use(VueRouter);
 Vue.use(VeeValidate);
@@ -18,5 +19,5 @@ const router = new VueRouter({
 
 new Vue({
   router,
-  render: h => h(App),
+  render: (h) => h(App),
 }).$mount('#tracker');
